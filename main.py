@@ -2,7 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy import select
 # from sqlalchemy import text
 from sqlalchemy.orm import Session
-
+from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload
+from typing import Iterable
 import config
 from models import Base, User, Address
 
@@ -69,6 +71,25 @@ def add_addresses(
     session.commit()
 
 
+def show_users(session: Session):
+    stmt = select(User).options(selectinload(User.addresses),)
+    users: Iterable[User] = session.scalars(stmt)
+
+    for user in users:
+        print('[+]', user)
+        for address in user.addresses:  # type: Address
+            print(' - @', address.email)
+
+
+def show_addresses(session: Session):
+    stmt = select(Address).options(joinedload(Address.user),)
+    addresses: Iterable[Address] = session.scalars(stmt)
+
+    for address in addresses:
+        print('[@]', address.email)
+        print(' +', address.user)
+
+
 def main():
     Base.metadata.create_all(bind=engine)
     with Session(engine) as session:
@@ -102,9 +123,10 @@ def main():
         #     ],
         # )
 
-        user = fetch_user(session, 'Bob White')
-        print('Bob White?', user)
-        add_addresses(session, user, 'bob@example.com')
+        # user = fetch_user(session, 'Bob White')
+        # print('Bob White?', user)
+        # add_addresses(session, user, 'bob@example.com')
+        show_addresses(session)
 
 
 if __name__ == '__main__':

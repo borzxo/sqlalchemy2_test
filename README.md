@@ -1,4 +1,4 @@
-# sqlalchemy_test
+# sqlalchemy2_test
 
 ### Links:
 - https://docs.sqlalchemy.org/en/20/
